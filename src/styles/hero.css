@@ -1,0 +1,84 @@
+/* ---------- Hero panel (setup, saved, error) ---------- */
+.hero {
+  --bg: var(--yellow);
+  --disc: var(--coral);
+  --ring: var(--purple);
+
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--bg);
+  border-radius: var(--r-lg);
+  padding: clamp(24px, 3vw, 40px);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 18px;
+}
+.hero[data-tone='purple'] {
+  --bg: var(--purple);
+  --disc: var(--yellow);
+  --ring: var(--coral);
+}
+.hero[data-tone='coral'] {
+  --bg: var(--coral);
+  --disc: var(--yellow);
+  --ring: var(--purple);
+}
+
+/* A record disc: the one decorative idea in the app */
+.hero-art {
+  position: absolute;
+  z-index: -1;
+  top: -90px;
+  right: -90px;
+  width: 240px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--disc);
+}
+.hero-art::before {
+  content: '';
+  position: absolute;
+  inset: -24px;
+  border-radius: 50%;
+  border: 10px solid var(--ring);
+}
+.hero-art::after {
+  content: '';
+  position: absolute;
+  inset: 34%;
+  border-radius: 50%;
+  background: var(--bg);
+}
+
+.badge {
+  position: absolute;
+  top: clamp(24px, 3vw, 40px);
+  left: clamp(24px, 3vw, 40px);
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--ink);
+  color: var(--yellow);
+}
+
+.hero-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.display {
+  font: 800 clamp(34px, 4.2vw, 54px) / 1.02 var(--font-display);
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+.lede {
+  max-width: 34ch;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 500;
+}

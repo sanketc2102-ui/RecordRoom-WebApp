@@ -1,0 +1,55 @@
+/* ==========================================================================
+   RecordRoom design system
+   Palette: coral #FF6F6F, yellow #FFF46E, grey #F6F6F6, purple #A58BFF
+   ========================================================================== */
+
+:root {
+  --coral: #ff6f6f;
+  --yellow: #fff46e;
+  --grey: #f6f6f6;
+  --purple: #a58bff;
+  --white: #ffffff;
+
+  --ink: #1d1633; /* deep violet, pulled from the purple so text feels part of the palette */
+  --ink-hover: #2e2350;
+  --ink-3: #675f80; /* secondary text, 5:1 on white */
+  --line: rgba(29, 22, 51, 0.1);
+
+  --r-lg: 28px;
+  --r-md: 20px;
+
+  --font-display: 'Bricolage Grotesque Variable', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Figtree Variable', 'Segoe UI', system-ui, sans-serif;
+
+  --accent: var(--purple); /* changes with the app state, see below */
+}
+
+/* The accent works like a studio tally light: it tells you the state from across the room */
+.app[data-state='recording'] {
+  --accent: var(--coral);
+}
+.app[data-state='paused'] {
+  --accent: var(--yellow);
+}
+.app[data-state='error'] {
+  --accent: var(--coral);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--grey);
+  color: var(--ink);
+  font: 500 15px/1.5 var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}

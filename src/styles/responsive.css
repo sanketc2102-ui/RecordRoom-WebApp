@@ -1,0 +1,35 @@
+/* ---------- Window sizes ---------- */
+@media (max-width: 960px) {
+  .stage {
+    grid-template-columns: minmax(0, 1fr) 290px;
+  }
+  .perm {
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    gap: 12px;
+  }
+  .perm-icon {
+    width: 48px;
+    height: 48px;
+  }
+}
+@media (max-height: 660px) {
+  .app {
+    padding: 12px 20px 18px;
+    gap: 12px;
+  }
+  .clock-card {
+    gap: 14px;
+    padding: 18px 20px;
+  }
+  .lede {
+    font-size: 15px;
+  }
+}
+@media (min-width: 1500px) {
+  .stage {
+    grid-template-columns: minmax(0, 1fr) 360px;
+  }
+  .clock {
+    font-size: 64px;
+  }
+}

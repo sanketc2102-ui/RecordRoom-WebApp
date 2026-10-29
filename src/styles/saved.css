@@ -1,0 +1,54 @@
+/* ---------- Saved ---------- */
+.file-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  min-width: 0;
+  padding: clamp(22px, 2.6vw, 34px);
+  border-radius: var(--r-lg);
+  background: var(--white);
+}
+.label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-3);
+}
+.file-name {
+  font: 700 clamp(20px, 2.4vw, 26px) / 1.15 var(--font-display);
+  word-break: break-all;
+}
+.file-path {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--grey);
+  font:
+    500 12.5px/1.5 Consolas,
+    'SF Mono',
+    Menlo,
+    monospace;
+  color: var(--ink-3);
+  word-break: break-all;
+}
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--grey);
+}
+.stat b {
+  font: 700 17px/1.2 var(--font-display);
+}
+.stat span {
+  font-size: 12px;
+  color: var(--ink-3);
+}

@@ -1,0 +1,69 @@
+/* ---------- Shell ---------- */
+.app {
+  height: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 18px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.topbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 40px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font: 800 20px/1 var(--font-display);
+  letter-spacing: -0.01em;
+}
+.mark {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--coral);
+  box-shadow: 0 0 0 5px var(--yellow);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  height: 34px;
+  padding: 0 16px 0 12px;
+  border-radius: 999px;
+  background: var(--white);
+  font-weight: 700;
+  font-size: 13px;
+}
+.chip-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: inset 0 0 0 1.5px rgba(29, 22, 51, 0.25);
+}
+.chip-dot.is-live {
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.view {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  gap: 16px;
+  animation: enter 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.split {
+  grid-template-columns: 5fr 6fr;
+}
+.stage {
+  grid-template-columns: minmax(0, 1fr) 320px;
+}
