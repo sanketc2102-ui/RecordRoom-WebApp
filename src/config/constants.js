@@ -20,3 +20,20 @@ export const CHUNK_INTERVAL_MS = 5000 // how often MediaRecorder hands over a ch
 
 // Microphone level meter
 export const METER_BARS = 24
+
+// ---- Google Drive upload (see src/utils/driveUploader.js) ----
+
+// Base URL of the Experience Portal API (the same one the Trainer Portal talks to).
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3002'
+
+// Recording is sent to Drive in pieces of this size while the class is still running.
+// Google requires a multiple of 256 KiB. 8 MiB is roughly 13 seconds of video at 5 Mbps.
+export const DRIVE_CHUNK_BYTES = 8 * 1024 * 1024
+
+// How long a failed upload piece is retried (network drop, laptop sleep) before giving up.
+export const UPLOAD_RETRY_WINDOW_MS = 30 * 60 * 1000
+
+// true: if RecordRoom is opened without a ticket from the Trainer Portal, still let the person
+// record and fall back to the old behaviour (download to this computer). Useful for local testing.
+// false: refuse to record without a ticket, so a class can never be recorded into the void.
+export const ALLOW_LOCAL_ONLY = import.meta.env.VITE_ALLOW_LOCAL_ONLY === 'true'

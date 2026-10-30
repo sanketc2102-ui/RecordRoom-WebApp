@@ -30,7 +30,7 @@ export default function RecordingScreen({ recorder }) {
           </div>
           <div className="fact">
             <dt>Saves to</dt>
-            <dd>Your Downloads folder</dd>
+            <dd>{recorder.isDrive ? 'Google Drive, then YouTube' : 'Your Downloads folder'}</dd>
           </div>
         </dl>
 
@@ -38,7 +38,12 @@ export default function RecordingScreen({ recorder }) {
           isLive={isLive}
           onPause={recorder.pause}
           onResume={recorder.resume}
-          onStop={recorder.stop}
+          onStop={() => {
+            // A class has one recording. Make an accidental click harmless.
+            if (!recorder.isDrive || window.confirm('End the class recording? This cannot be undone.')) {
+              recorder.stop()
+            }
+          }}
         />
       </aside>
     </main>

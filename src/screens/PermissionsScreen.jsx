@@ -3,16 +3,18 @@ import Hero from '../components/ui/Hero'
 import PermissionTile from '../components/ui/PermissionTile'
 import { MicIcon, ScreenIcon, RecordIcon } from '../components/icons'
 
-export default function PermissionsScreen({ permissions, onStart }) {
+export default function PermissionsScreen({ permissions, onStart, session }) {
   const { micOk, screenOk, permError, allowMic, allowScreen, ready } = permissions
 
   return (
     <main className="view split">
       <Hero tone="yellow">
-        <h1 className="display">Set up your recording</h1>
+        <h1 className="display">{session ? session.title : 'Set up your recording'}</h1>
         <p className="lede">
-          Allow your microphone and screen. Recording starts as soon as both are on, and the video
-          is saved on this computer.
+          Allow your microphone and screen. Recording starts as soon as both are on.{' '}
+          {session
+            ? 'The video is uploaded to Google Drive while you teach, then published to YouTube.'
+            : 'The video is saved on this computer.'}
         </p>
       </Hero>
 

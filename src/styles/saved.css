@@ -52,3 +52,50 @@
   font-size: 12px;
   color: var(--ink-3);
 }
+
+/* ---------- Upload progress (Drive -> YouTube) ---------- */
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
+}
+.steps li {
+  padding: 12px 14px 12px 40px;
+  border-radius: 12px;
+  background: var(--grey);
+  font-size: 14px;
+  font-weight: 600;
+  position: relative;
+}
+.steps li::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: var(--ink-3);
+}
+.steps li[data-tone='ok']::before {
+  background: #1fa971;
+}
+.steps li[data-tone='bad']::before {
+  background: var(--coral);
+}
+.steps li[data-tone='busy']::before {
+  background: var(--yellow);
+  animation: step-pulse 1.2s ease-in-out infinite;
+}
+@keyframes step-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .steps li[data-tone='busy']::before {
+    animation: none;
+  }
+}

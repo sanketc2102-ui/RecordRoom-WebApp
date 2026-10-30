@@ -10,11 +10,20 @@ import { createCanvasStream, createDirectStream } from '../utils/capture'
 import { createAudioMixer } from '../utils/audio'
 import { getMicStream, getScreenStream, pickMimeType, stopStream } from '../utils/media'
 import { addChunk, finishFile, startFile } from '../utils/recordingFile'
+import { DriveUploader } from '../utils/driveUploader'
 import useTimer from './useTimer'
 
 // The recording engine. Owns the streams, the MediaRecorder and the session state.
 // state: permissions | recording | paused | saved | error
-export default function useRecorder() {
+//
+// `launch.ticket` present  -> the video is streamed to Google Drive while recording (driveUploader.js)
+// `launch.ticket` missing  -> old behaviour: keep the video in memory and download it at the end
+export default function useRecorder(launch = {}) {
+  const ticket = launch.ticket || null
+  const isDrive = !!ticket
+  const [upload, setUpload] = useState(null) // progress of the Drive upload
+  const uploaderRef = useRef(null)
+  const startedAtRef = useRef(null)
   const [state, setState] = useState('permissions')
   const [error, setError] = useState('')
   const [savedFile, setSavedFile] = useState(null)
@@ -54,15 +63,22 @@ export default function useRecorder() {
         ...mixer.stream.getAudioTracks()
       ])
 
-      startFile()
-
       const mimeType = pickMimeType()
+      if (isDrive) {
+        uploaderRef.current = new DriveUploader({ ticket, onChange: setUpload })
+        uploaderRef.current.begin(mimeType)
+      } else {
+        startFile()
+      }
+      startedAtRef.current = new Date().toISOString()
       const mr = new MediaRecorder(combined, {
         mimeType: mimeType || undefined,
         videoBitsPerSecond: VIDEO_BITS_PER_SECOND
       })
       mr.ondataavailable = (e) => {
-        if (e.data.size > 0) addChunk(e.data)
+        if (e.data.size === 0) return
+        if (uploaderRef.current) uploaderRef.current.push(e.data)
+        else addChunk(e.data)
       }
       mr.start(CHUNK_INTERVAL_MS)
       mrRef.current = mr
@@ -74,6 +90,7 @@ export default function useRecorder() {
       timer.start()
       setState('recording')
     } catch (err) {
+      uploaderRef.current = null
       ;[screen, mic].forEach((s) => s && stopStream(s)) // don't leave the screen being shared
       canvasRef.current?.stop()
       audioCtxRef.current?.close()
@@ -113,26 +130,44 @@ export default function useRecorder() {
     analyserRef.current = null
     audioCtxRef.current?.close()
     audioCtxRef.current = null
+    const uploader = uploaderRef.current
+    if (uploader) {
+      // Most of the video is already in Drive. Show the "saved" screen straight away; it follows
+      // the last piece going up and then the YouTube copy (see UploadCard).
+      setSavedFile({ mode: 'drive', name: launch.session?.title || 'Class recording' })
+      setState('saved')
+      uploader.finish({
+        durationSeconds: timer.seconds,
+        startedAt: startedAtRef.current,
+        endedAt: new Date().toISOString()
+      })
+      return
+    }
     setSavedFile(finishFile(mr.mimeType))
     setState('saved')
   }
+
+  const retryUpload = () => uploaderRef.current?.retryRegister()
 
   // Lets the "Stop sharing" handler above always call the latest stop()
   useEffect(() => {
     stopRef.current = stop
   })
 
-  // Warn before the tab is closed or reloaded in the middle of a recording
+  // Warn before the tab is closed or reloaded in the middle of a recording, or while the last
+  // part of the video is still going up to Drive
   const active = state === 'recording' || state === 'paused'
+  const uploading = ['preparing', 'uploading', 'finalizing', 'registering'].includes(upload?.phase)
+  const guard = active || uploading
   useEffect(() => {
-    if (!active) return
+    if (!guard) return
     const warn = (e) => {
       e.preventDefault()
       e.returnValue = ''
     }
     window.addEventListener('beforeunload', warn)
     return () => window.removeEventListener('beforeunload', warn)
-  }, [active])
+  }, [guard])
 
   // The screen stream shown in the live preview
   const getPreviewStream = useCallback(() => streamsRef.current[0] || null, [])
@@ -148,6 +183,11 @@ export default function useRecorder() {
     isLive: state === 'recording',
     isPaused: state === 'paused',
     isActive: active,
+    isDrive,
+    session: launch.session || null,
+    ticket,
+    upload,
+    retryUpload,
     start,
     pause,
     resume,
