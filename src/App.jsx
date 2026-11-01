@@ -5,6 +5,8 @@ import usePermissions from './hooks/usePermissions'
 import useRecorder from './hooks/useRecorder'
 import useAutoStart from './hooks/useAutoStart'
 import useTabTitle from './hooks/useTabTitle'
+import useWakeLock from './hooks/useWakeLock'
+import useScreenAlerts from './hooks/useScreenAlerts'
 import TopBar from './components/layout/TopBar'
 import RecoveryBanner from './components/saved/RecoveryBanner'
 import PermissionsScreen from './screens/PermissionsScreen'
@@ -40,6 +42,8 @@ function Room({ launch }) {
     start: recorder.start
   })
   useTabTitle(recorder)
+  useWakeLock(recorder.isActive)
+  useScreenAlerts({ active: recorder.isActive, screenLost: recorder.screenLost })
 
   return (
     <div className="app" data-state={recorder.state}>

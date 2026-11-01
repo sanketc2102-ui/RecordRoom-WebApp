@@ -1,7 +1,7 @@
 /* ---------- Window sizes ---------- */
 @media (max-width: 960px) {
   .stage {
-    grid-template-columns: minmax(0, 1fr) 290px;
+    grid-template-columns: minmax(0, 400px) 290px;
   }
   .perm {
     grid-template-columns: 48px minmax(0, 1fr) auto;
@@ -10,6 +10,12 @@
   .perm-icon {
     width: 48px;
     height: 48px;
+  }
+}
+/* Short windows: drop the extra info so the right side fits without scrolling */
+@media (max-height: 700px) {
+  .facts {
+    display: none;
   }
 }
 @media (max-height: 660px) {
@@ -27,9 +33,72 @@
 }
 @media (min-width: 1500px) {
   .stage {
-    grid-template-columns: minmax(0, 1fr) 360px;
+    grid-template-columns: minmax(0, 520px) 360px;
   }
   .clock {
     font-size: 64px;
+  }
+}
+
+/* ---------- Narrow or short windows: pin the buttons to the bottom so they are always reachable ---------- */
+@media (max-width: 720px), (max-height: 560px) {
+  /* Keep the buttons pinned to the bottom of the window so they are always reachable */
+  .app {
+    padding-bottom: 96px; /* room for the pinned button bar (one row) */
+  }
+  .controls {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    margin: 0;
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    background: var(--grey);
+    box-shadow: 0 -6px 20px rgba(29, 22, 51, 0.12);
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 8px;
+  }
+  .controls .btn {
+    height: 44px;
+    font-size: 14px;
+    padding: 0 8px;
+  }
+  .controls .btn-coral,
+  .controls .btn-wide,
+  .controls .btn-minimize {
+    grid-column: auto;
+  }
+}
+
+/* ---------- Narrow windows: stack the recording stage ---------- */
+@media (max-width: 720px) {
+  body {
+    overflow-y: auto;
+  }
+  .app {
+    height: auto;
+    min-height: 100%;
+    padding: 12px 14px 18px;
+  }
+  .view {
+    flex: none;
+  }
+  .stage {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+  }
+  .frame {
+    max-width: 360px; /* keep the preview small when the layout is stacked */
+    margin: 0 auto;
+  }
+  .monitor .note {
+    text-align: center;
+  }
+  .console {
+    min-height: auto;
+  }
+  .app {
+    padding-bottom: 150px; /* room for the pinned button bar (two rows) */
   }
 }

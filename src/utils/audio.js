@@ -12,9 +12,17 @@ export function createAudioMixer(micStream, screenStream) {
   analyser.fftSize = 256
   micSource.connect(analyser)
 
-  if (screenStream.getAudioTracks().length > 0) {
-    ctx.createMediaStreamSource(new MediaStream(screenStream.getAudioTracks())).connect(dest)
+  // The system / tab sound can be swapped later (when the user changes the shared screen)
+  let screenSource = null
+  const setScreenAudio = (stream) => {
+    screenSource?.disconnect()
+    screenSource = null
+    if (stream && stream.getAudioTracks().length > 0) {
+      screenSource = ctx.createMediaStreamSource(new MediaStream(stream.getAudioTracks()))
+      screenSource.connect(dest)
+    }
   }
+  setScreenAudio(screenStream)
 
-  return { ctx, analyser, stream: dest.stream }
+  return { ctx, analyser, stream: dest.stream, setScreenAudio }
 }
