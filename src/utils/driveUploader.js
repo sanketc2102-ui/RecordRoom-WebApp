@@ -15,7 +15,7 @@
 // The resumable session URL itself authorises the uploads, so the 1-hour Drive token expiring in
 // the middle of a 2-hour class does not matter.
 import { api } from './api'
-import { DRIVE_CHUNK_BYTES, UPLOAD_RETRY_WINDOW_MS } from '../config/constants'
+import { API_BASE_URL, DRIVE_CHUNK_BYTES, UPLOAD_RETRY_WINDOW_MS } from '../config/constants'
 
 const DRIVE_INIT_URL =
   'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&supportsAllDrives=true&fields=id,name,size'
@@ -267,6 +267,10 @@ export class DriveUploader {
     }
     this.finishing = true
     this._set({ phase: 'finalizing' })
+    // Preferred: hand the last piece to our API, which closes the Drive file, registers it and
+    // starts YouTube. After that the tab is free to close. Falls back to doing it here.
+    if (await this._handOff()) return this.state.recording
+    this._set({ phase: 'finalizing' })
     // The sender loop may be idle, mid-piece, or just about to stop: kick it until Drive confirms.
     for (let i = 0; i < 3 && !this.driveFile?.id && this.state.phase !== 'error'; i++) {
       this._kick()
@@ -274,6 +278,45 @@ export class DriveUploader {
     }
     if (!this.driveFile?.id) return null
     return this._register()
+  }
+
+  // Gives the unsent tail + the Drive session to the API. Returns true once the API has accepted it.
+  // Contract (see README): POST {API}/api/recording-room/finalize-upload, multipart/form-data
+  //   meta: JSON { session_uri, offset, mime_type, duration_seconds, started_at, ended_at }
+  //   tail: the bytes from `offset` to the end of the video (may be empty)
+  // 2xx = the API will finish the upload; any other answer (e.g. 404 if not deployed) = false.
+  async _handOff() {
+    try {
+      // Let a piece that is already on its way finish, so `offset` is accurate
+      if (this.pump) await this.pump
+      if (this.state.phase === 'error' || this.sent + this.pending.size === 0) return false
+      const form = new FormData()
+      form.append(
+        'meta',
+        JSON.stringify({
+          session_uri: this.sessionUri,
+          offset: this.sent,
+          mime_type: this.mimeType,
+          duration_seconds: this.meta.durationSeconds,
+          started_at: this.meta.startedAt,
+          ended_at: this.meta.endedAt
+        })
+      )
+      form.append('tail', this.pending, 'tail.bin')
+      const res = await fetch(`${API_BASE_URL}/api/recording-room/finalize-upload`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${this.ticket}` },
+        body: form
+      })
+      if (!res.ok) return false
+      const json = await res.json().catch(() => ({}))
+      const recording = json?.data?.session_recording_id ? json.data : null
+      clearPending()
+      this._set({ phase: 'handed-off', recording })
+      return true
+    } catch {
+      return false
+    }
   }
 
   async _register() {

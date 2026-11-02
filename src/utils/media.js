@@ -11,13 +11,13 @@ let held = null
 
 const hasLiveVideo = (s) => !!s && s.getVideoTracks().some((t) => t.readyState === 'live')
 
-const requestDisplay = () => {
-  if (!navigator.mediaDevices?.getDisplayMedia) {
+const requestDisplay = (nav = navigator) => {
+  if (!nav.mediaDevices?.getDisplayMedia) {
     throw new Error(
       'This browser can’t record your screen. Open RecordRoom in Chrome or Edge on a computer, over https.'
     )
   }
-  return navigator.mediaDevices.getDisplayMedia({
+  return nav.mediaDevices.getDisplayMedia({
     video: { frameRate: FPS, width: { ideal: OUT_W }, height: { ideal: OUT_H } },
     audio: true, // system / tab sound, only if the user ticks "Share audio"
     systemAudio: 'include',
@@ -35,6 +35,10 @@ export const getScreenStream = async () => {
   held = null
   return requestDisplay()
 }
+
+// Asks for another screen/window while recording. Call it straight from a click. `win` is the
+// window the click happened in (the floating mini controller has its own).
+export const requestAnotherScreen = (win = window) => requestDisplay(win.navigator)
 
 // `onLost` runs if the user clicks the browser's "Stop sharing" before recording starts
 export const requestScreenPermission = async (onLost) => {

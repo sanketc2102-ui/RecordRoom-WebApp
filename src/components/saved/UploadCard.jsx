@@ -27,6 +27,8 @@ export default function UploadCard({ recorder }) {
 
   let driveLine
   if (phase === 'error') driveLine = { tone: 'bad', text: upload.error.message }
+  else if (phase === 'handed-off')
+    driveLine = { tone: 'ok', text: 'Handed over to the server. It is finishing the upload.' }
   else if (phase === 'done' || phase === 'registering')
     driveLine = { tone: 'ok', text: `Saved to Google Drive · ${mb(upload.sentBytes)} MB` }
   else
@@ -36,9 +38,18 @@ export default function UploadCard({ recorder }) {
     }
 
   let ytLine = { tone: 'wait', text: 'YouTube: waiting for the Drive upload to finish' }
+  if (phase === 'handed-off' && !recording)
+    ytLine = { tone: 'wait', text: 'YouTube: starts automatically once the upload is finished' }
   if (recording) {
     const s = yt?.youtube_status
-    if (s === 'AVAILABLE') ytLine = { tone: 'ok', text: 'Published on YouTube (unlisted)' }
+    if (yt?.stage === 'DRIVE' && s === 'FAILED')
+      ytLine = {
+        tone: 'bad',
+        text: 'The server could not finish saving the video to Google Drive. Please tell support.'
+      }
+    else if (yt?.stage === 'DRIVE')
+      ytLine = { tone: 'busy', text: 'The server is finishing the Google Drive upload…' }
+    else if (s === 'AVAILABLE') ytLine = { tone: 'ok', text: 'Published on YouTube (unlisted)' }
     else if (s === 'FAILED')
       ytLine = { tone: 'bad', text: 'YouTube upload failed. Your video is safe in Google Drive.' }
     else ytLine = { tone: 'busy', text: 'Sending to YouTube… this can take a while for a long class' }
@@ -56,8 +67,11 @@ export default function UploadCard({ recorder }) {
         <li data-tone={ytLine.tone}>{ytLine.text}</li>
       </ul>
 
-      {phase !== 'done' && phase !== 'error' && (
+      {phase !== 'done' && phase !== 'error' && phase !== 'handed-off' && (
         <p className="file-path">Keep this tab open until the upload finishes.</p>
+      )}
+      {phase === 'handed-off' && (
+        <p className="file-path">You can close this tab and start a new recording.</p>
       )}
       {phase === 'done' && (!yt || yt.youtube_status !== 'AVAILABLE') && yt?.youtube_status !== 'FAILED' && (
         <p className="file-path">You can close this tab. YouTube will finish on its own.</p>
